@@ -7,6 +7,7 @@ declare_id!("69sXnYv8GU8TqxYWodGNKrsa9XjHAEiPZM2evcAgpTWT");
 pub mod voting {
     use super::*;
 
+    // 指令1：初始化投票
     pub fn initialize_poll(
         ctx: Context<InitializePoll>,
         _poll_id: u64,
@@ -22,6 +23,7 @@ pub mod voting {
         Ok(())
     }
 
+    // 指令2：初始化候选人
     pub fn initialize_candidate(
         ctx: Context<InitializeCandidate>,
         _poll_id: u64,
@@ -32,6 +34,7 @@ pub mod voting {
         Ok(())
     }
 
+    // 指令3：投票
     pub fn vote(ctx: Context<Vote>, _poll_id: u64, _candidate: String) -> Result<()> {
         let candidate_account = &mut ctx.accounts.candidate_account;
         let current_time = Clock::get()?.unix_timestamp;
@@ -51,7 +54,7 @@ pub mod voting {
 }
 
 #[derive(Accounts)]
-#[instruction(poll_id: u64)]
+#[instruction(poll_id: u64)] // 投票id
 pub struct InitializePoll<'info> {
     #[account(mut)]
     pub signer: Signer<'info>,
