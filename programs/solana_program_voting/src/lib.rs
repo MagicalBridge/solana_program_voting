@@ -77,6 +77,7 @@ pub struct InitializeCandidate<'info> {
     #[account(mut)]
     pub signer: Signer<'info>,
 
+    #[account(mut)]
     pub poll_account: Account<'info, PollAccount>,
 
     #[account(
