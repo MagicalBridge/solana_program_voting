@@ -16,10 +16,10 @@ pub mod voting {
         name: String,
         description: String,
     ) -> Result<()> {
-        ctx.accounts.poll_account.poll_name = name;
-        ctx.accounts.poll_account.poll_description = description;
         ctx.accounts.poll_account.poll_voting_start = start_time;
         ctx.accounts.poll_account.poll_voting_end = end_time;
+        ctx.accounts.poll_account.poll_name = name;
+        ctx.accounts.poll_account.poll_description = description;
         Ok(())
     }
 

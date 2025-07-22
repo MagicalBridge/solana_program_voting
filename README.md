@@ -93,3 +93,52 @@ pub struct InitializePoll<'info> {
 3. **数据隔离** - 不同参数值对应不同的账户空间
 
 这就是为什么函数参数前有下划线 `_poll_id`（表示在函数体内未直接使用），但在账户结构体中需要通过宏访问的原因。
+
+## 在initialize_poll指令中，没有对 poll_option_index 这个字段初始化：
+
+在这个 `initialize_poll` 函数中，确实没有对 `poll_option_index` 进行显式初始化，但这在Anchor框架中是完全允许的，原因如下：
+
+### Anchor框架的零初始化机制
+
+当使用 `init` 或 `init_if_needed` 属性创建新账户时，Anchor会自动对账户进行**零初始化**（zero-initialization）：
+
+- `u64` 类型的字段会被初始化为 `0`
+- `String` 类型的字段会被初始化为空字符串 `""`
+- `bool` 类型会被初始化为 `false`
+- 等等...
+
+所以在这个例子中，`poll_option_index` 会被自动初始化为 `0`，这正是我们想要的初始值。
+
+### 标准Rust vs Anchor框架
+
+需要注意的是，这是Anchor框架的特性，而不是标准Rust的行为：
+
+标准Rust中：
+```rust
+// 这在标准Rust中是不允许的 - 必须初始化所有字段
+let poll = PollAccount {
+    poll_name: "test".to_string(),
+    poll_description: "desc".to_string(),
+    poll_voting_start: 100,
+    poll_voting_end: 200,
+    // poll_option_index: 0, // 必须显式初始化
+};
+```
+
+Anchor框架中：
+```rust
+// Anchor会自动零初始化所有未显式设置的字段
+ctx.accounts.poll_account.poll_voting_start = start_time;
+ctx.accounts.poll_account.poll_voting_end = end_time;
+ctx.accounts.poll_account.poll_name = name;
+ctx.accounts.poll_account.poll_description = description;
+// poll_option_index 自动为 0
+```
+
+### 为什么这样设计是合理的
+
+在投票系统中，`poll_option_index` 表示候选人数量，初始值为0是合理的，因为刚创建投票时还没有候选人。每当添加候选人时，这个值会在 `initialize_candidate` 函数中递增：
+
+```rust
+ctx.accounts.poll_account.poll_option_index += 1;
+```
